@@ -2,6 +2,7 @@
 
 ![Buildstatus](https://travis-ci.org/enen92/script.tubecast.svg?branch=master)
 ![License](http://img.shields.io/:license-mit-blue.svg?style=flat)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/767abb2a497c4f608c36e3db0ec6e39e)](https://www.codacy.com/app/92enen/script.tubecast?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=enen92/script.tubecast&amp;utm_campaign=Badge_Grade)
 
 ![fanart](https://github.com/enen92/script.tubecast/blob/master/resources/img/fanart.jpg?raw=true)
 
