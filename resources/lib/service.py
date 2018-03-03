@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-
-import threading
-
 from resources.lib.kodi import kodilogging
 from resources.lib.kodi.utils import get_setting_as_bool
 from resources.lib.tubecast.chromecast import Chromecast
@@ -27,7 +24,6 @@ def run():
 
     while not monitor.abortRequested():
         monitor.waitForAbort(1)
-    print threading.enumerate()
 
     # Abort services
     if get_setting_as_bool('enable-ssdp'):
