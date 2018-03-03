@@ -122,7 +122,8 @@ class SSDPHandler(DatagramRequestHandler):
         socket = self.request[1]
         socket.sendto(data, address)
 
-    def get_remote_ip(self, address):
+    @staticmethod
+    def get_remote_ip(address):
         # Create a socket to determine what address the client should use
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(address)

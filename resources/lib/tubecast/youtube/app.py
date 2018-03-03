@@ -182,7 +182,7 @@ class YoutubeCastV1(object):
                 kodibrigde.remote_connected(data["name"])
 
         elif case("remoteDisconnected", cmd):
-            code, data = parse_cmd(cmd)
+            _, data = parse_cmd(cmd)
             logger.info("Remote disconnected: {}".format(data))
             self._initial_app_state()
             kodibrigde.remote_disconnected(data["name"])
@@ -196,7 +196,6 @@ class YoutubeCastV1(object):
             logger.debug("setPlaylist: {}".format(data))
             cur_video_id = data["videoId"]
             video_ids = data["videoIds"]
-            current_time = data["currentTime"]
             self.ctt = data["ctt"]
             self.cur_list_id = data["listId"]
             self.current_index = int(data["currentIndex"])
@@ -208,7 +207,6 @@ class YoutubeCastV1(object):
         elif case("updatePlaylist", cmd):
             _, data = parse_cmd(cmd)
             logger.debug("updatePlaylist: {}".format(data))
-            cur_list_id = data["listId"]
             if "videoIds" in data.keys():
                 self.cur_list = data["videoIds"].split(",")
                 if self.current_index >= len(self.cur_list):

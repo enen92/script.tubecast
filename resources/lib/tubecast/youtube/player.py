@@ -12,7 +12,7 @@ class CastPlayer(xbmc.Player):
     def __init__(self, youtubecastv1):
         self.youtubecastv1 = youtubecastv1
         self.from_yt = False # auxiliar variable to know if the request came from the youtube background thread
-        self.playing = False	
+        self.playing = False
         self.video_id = None
         self.ctt = None
         self.list_id = None
@@ -28,7 +28,8 @@ class CastPlayer(xbmc.Player):
         self.from_y = True
         self.play(url)
 
-    def getPlayingStatusCode(self):
+    @staticmethod
+    def getPlayingStatusCode():
         return 2 if xbmc.getInfoLabel('Player.Paused') else 1
 
     def onPlayBackStarted(self):

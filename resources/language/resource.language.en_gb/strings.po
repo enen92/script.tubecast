@@ -65,3 +65,6 @@ msgctxt "#32011"
 msgid "Debug youtube cmds"
 msgstr ""
 
+msgctxt "#32012"
+msgid "Debug"
+msgstr ""
