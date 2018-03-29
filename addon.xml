@@ -7,7 +7,7 @@
         <import addon="plugin.video.youtube" version="5.5.1"/>
     </requires>
     <extension point="xbmc.python.script" library="script.py" />
-    <extension point="xbmc.service" library="main.py" start="startup"/>
+    <extension point="xbmc.service" library="main.py" start="login"/>
     <extension point="xbmc.addon.metadata">
         <summary lang="en_GB">Cast videos from the Youtube application to Kodi</summary>
         <summary lang="pt_PT">Cast de vídeos a partir da aplicação móvel Youtube para o Kodi</summary>
