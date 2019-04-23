@@ -18,8 +18,8 @@ __device__ = '''<?xml version="1.0" encoding="utf-8"?>
         <device>
             <deviceType>urn:schemas-upnp-org:device:dail:1</deviceType>
             <friendlyName>{{ friendlyName }}</friendlyName>
-            <manufacturer>Google Inc.</manufacturer>
-            <modelName>Eureka Dongle</modelName>
+            <manufacturer>enen92</manufacturer>
+            <modelName>Kodi</modelName>
             <UDN>uuid:{{ uuid }}</UDN>
             <serviceList>
                 <service>
