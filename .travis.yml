@@ -6,8 +6,9 @@ install:
   - pip install python-dateutil pytest kodi-addon-checker
 script:
   - py.test -v
-  - kodi-addon-checker --branch=krypton .
-before_deploy:
+  - unzip *.zip -d script.tubecast
+  - kodi-addon-checker --branch=krypton script.tubecast
+before_script:
   - pip install git+https://github.com/romanvm/kodi-addon-submitter.git
   - submit-addon -z script.tubecast # Create an installable ZIP
   - export RELEASE_ZIP=$(ls *.zip)
