@@ -1,6 +1,6 @@
 .gitignore export-ignore
 .gitattributes export-ignore
-.github
+.github export-ignore
 tests export-ignore
 .pytest_cache export-ignore
 __pycache__ export-ignore
