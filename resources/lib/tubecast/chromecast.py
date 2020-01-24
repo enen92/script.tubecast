@@ -28,6 +28,9 @@ class SilentWSGIRequestHandler(WSGIRequestHandler):
             # Avoid garbage on the kodi log
             pass
 
+    def address_string(self):
+        return self.client_address[0]
+
 
 class ThreadedWSGIServer(ThreadingMixIn, WSGIServer):
     """Multi-Threaded WSGI server"""
