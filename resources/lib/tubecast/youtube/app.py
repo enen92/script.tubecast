@@ -319,7 +319,11 @@ class YoutubeCastV1(object):
             self.player.pause()
 
     def _seek(self, time_seek):
-        if self.player.playing and self.player.isPlaying():
+        if self.player.isPlaying():
+            # Inform the app that we're loading (state=3).
+            # This isn't just for the user experience, it's actually required
+            # to make the app update it's progress (It only seems to work when the state changes)
+            self.__send_state_change(time_seek, self.player.getTotalTime(), state=3)
             self.player.seekTime(int(time_seek))
 
     def _pause(self):
@@ -343,14 +347,14 @@ class YoutubeCastV1(object):
 
     def pause(self, time, duration):
         self.play_state = 2
-        self.__post_bind("onStateChange", {"currentTime": str(time), "state": str(self.play_state), "duration": duration, "cpn": "foo"})
+        self.__send_state_change(time, duration)
 
     def _set_disabled(self):
         self.__post_bind("onAutoplayModeChanged", {"autoplayMode": "ENABLED"})
 
     def report_playback_ended(self):
         # Inform current state (stopped)
-        self.__post_bind("onStateChange", {"state": "4", "currentTime": "0", "duration": "0", "cpn": "foo"})
+        self.__send_state_change(0, 0, state=4)
         if self.cur_list and isinstance(self.current_index, int) and self.current_index + 1 < len(self.cur_list):
             self._next()
         else:
@@ -362,8 +366,8 @@ class YoutubeCastV1(object):
 
     def report_playing_time(self, play_state, current_time, duration):
         logger.debug("Report playback current time")
-        self.play_state = 1
-        self.__post_bind("onStateChange", {"currentTime": str(current_time), "state": str(self.play_state), "duration": str(duration), "cpn": "foo"})
+        self.play_state = play_state
+        self.__send_state_change(current_time, duration)
 
     def _get_volume(self):
         volume = kodibrigde.get_kodi_volume()
@@ -375,6 +379,11 @@ class YoutubeCastV1(object):
     def _set_volume(self, volume):
         kodibrigde.set_kodi_volume(int(volume))
         threading.Thread(target=self.__post_bind, args=["onVolumeChanged", {"volume": str(volume), "muted": "false"}]).start()
+
+    def __send_state_change(self, current_time, duration, state=None):  # type: (float, float, int) -> None
+        if state is None:
+            state = self.play_state
+        self.__post_bind("onStateChange", {"currentTime": str(current_time), "state": str(state), "duration": str(duration), "cpn": "foo"})
 
     def __post_bind(self, sc, postdata):
         self.ofs += 1
