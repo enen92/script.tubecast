@@ -241,7 +241,8 @@ class YoutubeCastV1(object):
                 self.cur_list = video_ids.split(",")
                 # Set info on our custom player instance and request playback
                 self.player.setInfo(cur_video_id, self.ctt, self.cur_list_id, self.current_index)
-                self.player.play_from_youtube(kodibrigde.get_youtube_plugin_path(cur_video_id))
+                play_url = kodibrigde.get_youtube_plugin_path(cur_video_id, seek=data.get("currentTime", 0))
+                self.player.play_from_youtube(play_url)
             else:
                 logger.debug("Command ignored, already executed before")
 
