@@ -1,5 +1,7 @@
 .DS_Store
 *.pyo
 *.pyc
+.idea
 .vscode
 __pycache__
+venv
