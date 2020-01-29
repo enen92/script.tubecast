@@ -21,4 +21,12 @@ class VolumeMonitor(xbmc.Monitor):
             new_volume = json.loads(data)["volume"]
             if self.kodi_volume != new_volume:
                 self.kodi_volume = new_volume
-                self.youtubecastv1.set_volume(new_volume)
+                self.cast.report_volume(new_volume)
+
+    def start(self):
+        self.thread = threading.Thread(name="VolumeMonitor", target=self.__run)
+        self.thread.start()
+
+    def __run(self):
+        while self.cast.has_client and not self.abortRequested():
+            self.waitForAbort(1)
