@@ -16,7 +16,7 @@ else:
     from SocketServer import DatagramRequestHandler, ThreadingUDPServer
 
 
-logger = kodilogging.get_logger()
+logger = kodilogging.get_logger("ssdp")
 
 
 def get_interface_address(if_name):

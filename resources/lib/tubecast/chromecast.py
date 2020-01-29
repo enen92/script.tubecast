@@ -13,7 +13,8 @@ from resources.lib.tubecast.dial import app
 
 import socket
 
-logger = kodilogging.get_logger()
+
+logger = kodilogging.get_logger("chromecast")
 
 
 class SilentWSGIRequestHandler(WSGIRequestHandler):
