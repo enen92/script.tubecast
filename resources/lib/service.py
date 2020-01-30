@@ -14,13 +14,15 @@ monitor = xbmc.Monitor()
 
 def run():
     generate_uuid()
+
+    # Start HTTP server
+    chromecast = Chromecast(monitor)
+    chromecast_addr = chromecast.start()
+
     # Start SSDP service
     if get_setting_as_bool('enable-ssdp'):
         ssdp_server = SSDPserver()
-        ssdp_server.start(interfaces=Kodicast.interfaces)
-    # Start HTTP server
-    chromecast = Chromecast(monitor)
-    chromecast.start()
+        ssdp_server.start(chromecast_addr, interfaces=Kodicast.interfaces)
 
     while not monitor.abortRequested():
         monitor.waitForAbort(1)

@@ -50,11 +50,12 @@ class MulticastServer(ControlMixin, ThreadingUDPServer):
 
     allow_reuse_address = True
 
-    def __init__(self, addr, handler, poll_interval=0.5, bind_and_activate=True, interfaces=None):
+    def __init__(self, addr, handler, chromecast_addr, poll_interval=0.5, bind_and_activate=True, interfaces=None):
         ThreadingUDPServer.__init__(self, ('', addr[1]),
                                     handler,
                                     bind_and_activate)
         ControlMixin.__init__(self, handler, poll_interval)
+        self.chromecast_addr = chromecast_addr
         self._multicast_address = addr
         self._listen_interfaces = interfaces
         self.set_loopback_mode(1)  # localhost
@@ -110,7 +111,7 @@ class SSDPHandler(DatagramRequestHandler):
 
     header = '''\
 HTTP/1.1 200 OK\r
-LOCATION: http://{{ ip }}:8008/ssdp/device-desc.xml\r
+LOCATION: http://{{ ip }}:{{ port }}/ssdp/device-desc.xml\r
 CACHE-CONTROL: max-age=1800\r
 EXT: \r
 SERVER: UPnP/1.0\r
@@ -128,22 +129,17 @@ ST: urn:dial-multiscreen-org:service:dial:1\r
         socket = self.request[1]
         socket.sendto(str_to_bytes(data), address)
 
-    @staticmethod
-    def get_remote_ip(address):
-        # Create a socket to determine what address the client should use
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(address)
-        iface = s.getsockname()[0]
-        return iface if PY3 else unicode(iface)
-
     def datagram_received(self, datagram, address):
         if get_setting_as_bool('debug-ssdp'):
             logger.debug('Datagram received. Address:{}; Content:{}'.format(address, datagram))
         if b"urn:dial-multiscreen-org:service:dial:1" in datagram and b"M-SEARCH" in datagram:
             if get_setting_as_bool('debug-ssdp'):
                 logger.debug("Answering datagram")
+
+            ip, port = self.server.chromecast_addr
             data = build_template(self.header).render(
-                ip=self.get_remote_ip(address),
+                ip=ip,
+                port=port,
                 uuid=Kodicast.uuid
             )
             self.reply(data, address)
@@ -153,9 +149,11 @@ class SSDPserver(object):
     SSDP_ADDR = '239.255.255.250'
     SSDP_PORT = 1900
 
-    def start(self, interfaces=None):
+    def start(self, chromecast_addr, interfaces=None):
         logger.info('Starting SSDP server')
-        self.server = MulticastServer((self.SSDP_ADDR, self.SSDP_PORT), SSDPHandler, interfaces=interfaces)
+        self.server = MulticastServer((self.SSDP_ADDR, self.SSDP_PORT), SSDPHandler,
+                                      chromecast_addr=chromecast_addr,
+                                      interfaces=interfaces)
         self.server.start()
 
     def shutdown(self):
