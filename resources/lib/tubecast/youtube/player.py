@@ -80,7 +80,5 @@ class CastPlayer(xbmc.Player):
         self.__report_state_change(status_code=STATUS_LOADING)
 
     def onPlayBackStopped(self):
-        logger.debug("stopped by user")
-        # FIXME: This should probably behave differently than when the video ends naturally...
-        if self.cast.has_client:
-            self.onPlayBackEnded()
+        if self.__should_report():
+            self.cast.report_playback_stopped()

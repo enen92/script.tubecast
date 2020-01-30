@@ -358,9 +358,13 @@ class YoutubeCastV1(object):
             logger.debug("unhandled command: %r", name)
 
     def _resume(self):
-        if not self.player.playing and self.player.isPlaying():
+        is_playing = self.player.isPlaying()
+        if is_playing and self.player.playing:
             # Toggle playback to resume
             self.player.pause()
+        elif not is_playing and self.state.has_playlist:
+            # Start playing after player has been stopped
+            self.player.play_from_youtube(kodibrigde.get_youtube_plugin_path(self.state.video_id))
 
     def _seek(self, time_seek):  # type: (int) -> None
         if self.player.isPlaying():
@@ -399,6 +403,10 @@ class YoutubeCastV1(object):
             data.update(currentTime=str(int(self.player.getTime())), state=str(self.player.status_code))
 
         self.__post_bind("nowPlaying", data)
+
+    def report_playback_stopped(self):
+        logger.debug("Report playback stopped")
+        self.report_state_change(STATUS_STOPPED, 0, 0)
 
     def report_playback_ended(self):
         logger.debug("Report playback ended")
@@ -509,7 +517,10 @@ class YoutubeListener(threading.Thread):
 
     def run(self):
         while not self.stop and (not self.ssdp or self.app.has_client):
-            self._listen()
+            try:
+                self._listen()
+            except Exception:
+                logger.exception("error while listening")
 
     def force_stop(self):
         self.stop = True
