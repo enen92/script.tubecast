@@ -25,6 +25,8 @@ logger = kodilogging.get_logger()
 monitor = xbmc.Monitor()
 templates = YoutubeTemplates()
 
+MAX_SEND_RETRIES = 3
+
 
 class CastState(object):
     def __init__(self):
@@ -287,7 +289,7 @@ class YoutubeCastV1(object):
                 self.volume_monitor.start()
 
             # Disable automatic playback from youtube (this is kodi not youtube :))
-            # TODO: add setting for this.
+            # TODO: see issue #15
             self._disable_autoplay()
             # Check if it is a new association
             if self.connected_client != data:
@@ -400,8 +402,6 @@ class YoutubeCastV1(object):
 
     def report_playback_ended(self):
         logger.debug("Report playback ended")
-        # Inform current state (stopped)
-        # FIXME this doesn't behave as expected in the app
         self.report_state_change(STATUS_STOPPED, 0, 0)
         if self.state.playlist_next():
             self.player.play_from_youtube(kodibrigde.get_youtube_plugin_path(self.state.video_id))
@@ -430,14 +430,26 @@ class YoutubeCastV1(object):
 
         bind_vals = self.bind_vals
         bind_vals["RID"] = "1337"
-        self.session.post(
-            "{}/api/lounge/bc/bind?{}".format(
-                self.base_url,
-                urlencode(bind_vals)
-            ),
-            data=post_data,
-            verify=get_setting_as_bool("verify-ssl")
-        )
+        url = "{}/api/lounge/bc/bind?{}".format(self.base_url, urlencode(bind_vals))
+        verify_ssl = get_setting_as_bool("verify-ssl")
+
+        last_exc = None
+        for i in range(MAX_SEND_RETRIES):
+            try:
+                self.session.post(url, data=post_data, verify=verify_ssl)
+            except requests.ConnectionError as e:
+                logger.info("failed to send data on attempt %s/%s", i + 1, MAX_SEND_RETRIES)
+                last_exc = e
+                continue
+            except Exception:
+                logger.exception("error sending %s", sc)
+                break
+            else:
+                # request successful
+                break
+        else:
+            # MAX_SEND_RETRIES exceeded
+            logger.exception("failed to send data to client", exc_info=last_exc)
 
     def __player_thread(self):
         self.player = CastPlayer(cast=self)
