@@ -29,16 +29,24 @@ class CastPlayer(xbmc.Player):
 
     @property
     def playing(self):  # type: () -> bool
+        """Whether the player is currently playing.
+
+        This is different from `isPlaying` in that it returns `False` if the
+        player is paused or otherwise not actively playing.
+        """
         return xbmc.getCondVisibility("Player.Playing")
 
-    def _should_report(self):  # type: () -> bool
+    def __should_report(self):  # type: () -> bool
         return self.cast.has_client and self.from_yt
 
     def __report_state_change(self):
+        if not self.__should_report():
+            return
+
         self.cast.report_state_change(self.status_code, int(self.getTime()), int(self.getTotalTime()))
 
     def onPlayBackStarted(self):
-        if not self._should_report():
+        if not self.__should_report():
             return
 
         try:
@@ -48,28 +56,26 @@ class CastPlayer(xbmc.Player):
 
         self.cast.report_playback_started(playing_time)
 
-        while self.isPlaying() and self._should_report() and not monitor.abortRequested():
+        while self.isPlaying() and self.__should_report() and not monitor.abortRequested():
             self.__report_state_change()
             monitor.waitForAbort(5)
 
     def onPlayBackResumed(self):
-        if self._should_report():
-            self.__report_state_change()
+        self.__report_state_change()
 
     def onPlayBackPaused(self):
-        if self._should_report():
-            self.__report_state_change()
+        self.__report_state_change()
 
     def onPlayBackEnded(self):
-        if self._should_report():
+        if self.__should_report():
             self.cast.report_playback_ended()
 
         self.from_yt = False
 
     def onPlayBackSeek(self, time, seek_offset):
-        if self._should_report():
-            self.__report_state_change()
+        self.__report_state_change()
 
     def onPlayBackStopped(self):
+        # FIXME: This should probably behave differently than when the video ends naturally...
         if self.cast.has_client:
             self.onPlayBackEnded()

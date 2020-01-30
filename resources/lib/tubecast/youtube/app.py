@@ -77,9 +77,21 @@ class CastState(object):
         return True
 
     def playlist_next(self):  # type: () -> bool
+        """Advance to the next video in the playlist.
+
+        Returns:
+            Whether the operation succeeded.
+            `False` if there is no playlist or we're on the last video.
+        """
         return self._change_playlist_index(1)
 
     def playlist_prev(self):  # type: () -> bool
+        """Go to the previous video in the playlist.
+
+        Returns:
+            Whether the operation succeeded.
+            `False` if there is no playlist or we're on the first video.
+        """
         return self._change_playlist_index(-1)
 
     def now_playing_data(self, current_time, status_code):  # type: (int, int) -> dict

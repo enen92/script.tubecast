@@ -28,9 +28,9 @@ CMD_PATTERN = re.compile(r"\[(?P<code>\d+),\[\"(?P<cmd>.+?)\"(?:,(?P<data>.*?))?
 
 
 class CommandParser:
-    """
+    """Buffering stream parser for YouTube Cast commands.
 
-    .. warning:: This class isn't thread-safe!
+    Warnings: This class isn't thread-safe!
     """
 
     def __init__(self, buf=None):
