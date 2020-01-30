@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import ast
+import logging
 import re
 from collections import namedtuple
 
 from resources.lib.kodi import kodilogging
+from resources.lib.kodi.utils import get_setting_as_bool
 
 logger = kodilogging.get_logger()
 
@@ -26,6 +28,11 @@ CMD_PATTERN = re.compile(r"\[(?P<code>\d+),\[\"(?P<cmd>.+?)\"(?:,(?P<data>.*?))?
 
 
 class CommandParser:
+    """
+
+    .. warning:: This class isn't thread-safe!
+    """
+
     def __init__(self, buf=None):
         self.pending = ""
 
@@ -39,22 +46,33 @@ class CommandParser:
         if not self.pending:
             return
 
-        for match in CMD_PATTERN.finditer(self.pending):
-            self.pending = self.pending[match.end():]
+        debug_cmds = logger.isEnabledFor(logging.DEBUG) and get_setting_as_bool("debug-cmd")
 
-            try:
-                cmd = _command_from_match(match)
-            except SyntaxError:
-                logger.exception("unable to parse command")
-            else:
-                yield cmd
+        end_index = 0
+        try:
+            for match in CMD_PATTERN.finditer(self.pending):
+                if debug_cmds:
+                    skipped = self.pending[end_index:match.start()]
+                    if skipped:
+                        logger.debug("command parser skipped: %r", skipped)
+
+                end_index = match.end()
+
+                try:
+                    cmd = _command_from_match(match)
+                except SyntaxError:
+                    logger.exception("unable to parse command")
+                else:
+                    yield cmd
+        finally:
+            self.pending = self.pending[end_index:]
 
     def write(self, s):  # type: (str) -> None
         for line in s.splitlines():
             self.pending += line
 
-    def get_commands(self):  # type: () -> List[Command]
-        return list(self)
+    def get_commands(self):  # type: () -> Tuple[Command, ...]
+        return tuple(self)
 
 
 def get_video_list(data):

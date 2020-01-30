@@ -350,7 +350,7 @@ class YoutubeCastV1(object):
 
     def _resume(self):
         if not self.player.playing and self.player.isPlaying():
-            # Resume playback
+            # Toggle playback to resume
             self.player.pause()
 
     def _seek(self, time_seek):  # type: (int) -> None
@@ -418,8 +418,8 @@ class YoutubeCastV1(object):
         for key in postdata.keys():
             post_data["req0_" + key] = postdata[key]
 
-        # TODO add setting
-        logger.debug("POST %s:\n%r", sc, post_data)
+        if get_setting_as_bool("debug-http"):
+            logger.debug("POST %s:\n%r", sc, post_data)
 
         bind_vals = self.bind_vals
         bind_vals["RID"] = "1337"
@@ -484,10 +484,13 @@ class YoutubeListener(threading.Thread):
         bind_vals["AID"] = "3"
         url = "{}/api/lounge/bc/bind?{}".format(self.app.base_url, urlencode(bind_vals))
 
+        debug_http = get_setting_as_bool("debug-http")
+
         parser = CommandParser()
         for chunk in self.__read_cmd_chunks(url):
-            # TODO add setting for all request related logs
-            logger.debug("received chunk %r", chunk)
+            if debug_http:
+                logger.debug("received chunk %r", chunk)
+
             parser.write(chunk)
             for cmd in parser.get_commands():
                 self.app.handle_cmd(cmd)
