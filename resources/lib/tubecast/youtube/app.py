@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import re
 import socket
 import threading
 
@@ -10,7 +9,7 @@ from resources.lib.kodi import kodilogging
 from resources.lib.kodi.utils import get_device_id, get_setting_as_bool
 from resources.lib.tubecast.utils import PY3
 from resources.lib.tubecast.youtube import kodibrigde
-from resources.lib.tubecast.youtube.player import CastPlayer, STATUS_STOPPED, STATUS_LOADING
+from resources.lib.tubecast.youtube.player import CastPlayer, STATUS_LOADING, STATUS_STOPPED
 from resources.lib.tubecast.youtube.templates import YoutubeTemplates
 from resources.lib.tubecast.youtube.utils import CommandParser
 from resources.lib.tubecast.youtube.volume import VolumeMonitor
@@ -48,7 +47,6 @@ class CastState(object):
 
     def handle_set_playlist(self, data):
         self.ctt = data["ctt"]
-        # self.video_id = data["videoId"]
 
         self.playlist_id = data["listId"]
         self.playlist = data["videoIds"].split(",")
@@ -94,16 +92,14 @@ class CastState(object):
         """
         return self._change_playlist_index(-1)
 
-    def now_playing_data(self, current_time, status_code):  # type: (int, int) -> dict
+    def create_state_data(self):  # type: () -> dict
         if not self.has_playlist:
             return {}
 
         return {"videoId": self.video_id,
-                "currentTime": str(current_time),
                 "ctt": self.ctt,
                 "listId": self.playlist_id,
-                "currentIndex": self.playlist_index,
-                "state": str(status_code)}
+                "currentIndex": self.playlist_index}
 
 
 class YoutubeCastV1(object):
@@ -268,7 +264,7 @@ class YoutubeCastV1(object):
             if debug_cmds:
                 logger.debug("Command ignored, already executed before")
             return
-        
+
         self.code = code
 
         if name == "c":
@@ -292,7 +288,7 @@ class YoutubeCastV1(object):
 
             # Disable automatic playback from youtube (this is kodi not youtube :))
             # TODO: add setting for this.
-            self._set_disabled()
+            self._disable_autoplay()
             # Check if it is a new association
             if self.connected_client != data:
                 self.connected_client = data
@@ -355,6 +351,7 @@ class YoutubeCastV1(object):
         elif name == "play":
             logger.debug("play received")
             self._resume()
+
         elif debug_cmds:
             logger.debug("unhandled command: %r", name)
 
@@ -385,40 +382,40 @@ class YoutubeCastV1(object):
 
         self.player.play_from_youtube(kodibrigde.get_youtube_plugin_path(self.state.video_id))
 
-    def _set_disabled(self):
-        self.__post_bind("onAutoplayModeChanged", {"autoplayMode": "ENABLED"})
+    def _disable_autoplay(self):
+        self.__post_bind("onAutoplayModeChanged", {"autoplayMode": "DISABLED"})
 
     def _set_volume(self, volume):
         kodibrigde.set_kodi_volume(int(volume))
         self.report_volume(volume)
 
     def report_now_playing(self):
+        logger.debug("Report now playing")
+        data = self.state.create_state_data()
+
         if self.player and self.player.isPlaying():
-            data = self.state.now_playing_data(int(self.player.getTime()), self.player.status_code)
-        else:
-            data = {}
+            data.update(currentTime=str(int(self.player.getTime())), state=str(self.player.status_code))
 
         self.__post_bind("nowPlaying", data)
 
     def report_playback_ended(self):
+        logger.debug("Report playback ended")
         # Inform current state (stopped)
+        # FIXME this doesn't behave as expected in the app
         self.report_state_change(STATUS_STOPPED, 0, 0)
         if self.state.playlist_next():
             self.player.play_from_youtube(kodibrigde.get_youtube_plugin_path(self.state.video_id))
         else:
             self.report_now_playing()
 
-    def report_playback_started(self, current_time):  # type: (int) -> None
-        logger.debug("Report playback started")
-        self.__post_bind("nowPlaying", self.state.now_playing_data(current_time, STATUS_LOADING))
-
     def report_volume(self, volume):  # type: (int) -> None
+        logger.debug("Report volume")
         self.__post_bind("onVolumeChanged", {"volume": str(volume), "muted": "false"})
 
-    def report_state_change(self, state, current_time, duration):  # type: (int, int, int) -> None
+    def report_state_change(self, status_code, current_time, duration):  # type: (int, int, int) -> None
         self.__post_bind("onStateChange",
                          {"currentTime": str(current_time),
-                          "state": str(state),
+                          "state": str(status_code),
                           "duration": str(duration),
                           "cpn": "foo"})
 
@@ -441,13 +438,6 @@ class YoutubeCastV1(object):
             data=post_data,
             verify=get_setting_as_bool("verify-ssl")
         )
-
-    def _get_list_info(self, list_id):
-        r = self.session.get(
-            "{}/list_ajax?style=json&action_get_list=1&list={}".format(self.base_url, list_id),
-            verify=get_setting_as_bool("verify-ssl")
-        )
-        return r.json()["video"]
 
     def __player_thread(self):
         self.player = CastPlayer(cast=self)

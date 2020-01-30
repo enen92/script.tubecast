@@ -39,22 +39,20 @@ class CastPlayer(xbmc.Player):
     def __should_report(self):  # type: () -> bool
         return self.cast.has_client and self.from_yt
 
-    def __report_state_change(self):
+    def __report_state_change(self, status_code=None):
         if not self.__should_report():
             return
 
-        self.cast.report_state_change(self.status_code, int(self.getTime()), int(self.getTotalTime()))
+        if status_code is None:
+            status_code = self.status_code
+
+        self.cast.report_state_change(status_code, int(self.getTime()), int(self.getTotalTime()))
 
     def onPlayBackStarted(self):
         if not self.__should_report():
             return
 
-        try:
-            playing_time = int(self.getTime())
-        except Exception:
-            playing_time = 0
-
-        self.cast.report_playback_started(playing_time)
+        self.cast.report_now_playing()
 
         while self.isPlaying() and self.__should_report() and not monitor.abortRequested():
             self.__report_state_change()
@@ -73,7 +71,7 @@ class CastPlayer(xbmc.Player):
         self.from_yt = False
 
     def onPlayBackSeek(self, time, seek_offset):
-        self.__report_state_change()
+        self.__report_state_change(status_code=STATUS_LOADING)
 
     def onPlayBackStopped(self):
         # FIXME: This should probably behave differently than when the video ends naturally...
