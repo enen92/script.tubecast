@@ -17,7 +17,6 @@ class CastPlayer(xbmc.Player):
         self.cast = cast
         # auxiliary variable to know if the request came from the youtube background thread
         self.from_yt = False
-        self.playing = False
 
     def play_from_youtube(self, url):  # type: (str) -> None
         self.from_yt = True
@@ -28,6 +27,10 @@ class CastPlayer(xbmc.Player):
         # TODO add more states
         return STATUS_PAUSED if xbmc.getCondVisibility('Player.Paused') else STATUS_PLAYING
 
+    @property
+    def playing(self):  # type: () -> bool
+        return xbmc.getCondVisibility("Player.Playing")
+
     def _should_report(self):  # type: () -> bool
         return self.cast.has_client and self.from_yt
 
@@ -35,8 +38,6 @@ class CastPlayer(xbmc.Player):
         self.cast.report_state_change(self.status_code, int(self.getTime()), int(self.getTotalTime()))
 
     def onPlayBackStarted(self):
-        self.playing = True
-
         if not self._should_report():
             return
 
@@ -52,17 +53,14 @@ class CastPlayer(xbmc.Player):
             monitor.waitForAbort(5)
 
     def onPlayBackResumed(self):
-        self.playing = True
         if self._should_report():
             self.__report_state_change()
 
     def onPlayBackPaused(self):
-        self.playing = False
         if self._should_report():
             self.__report_state_change()
 
     def onPlayBackEnded(self):
-        self.playing = False
         if self._should_report():
             self.cast.report_playback_ended()
 

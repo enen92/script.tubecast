@@ -304,9 +304,8 @@ class YoutubeCastV1(object):
         elif name == "updatePlaylist":
             logger.debug("updatePlaylist: {}".format(data))
             self.state.handle_update_playlist(data)
-            if not self.state.has_playlist:
-                if self.player.playing:
-                    self.player.stop()
+            if not self.state.has_playlist and self.player.isPlaying():
+                self.player.stop()
 
         elif name == "next":
             logger.debug("Next received")
@@ -322,9 +321,8 @@ class YoutubeCastV1(object):
 
         elif name == "stopVideo":
             logger.debug("stopVideo received")
-            # FIXME: this doesn't stop the video
-            if self.player and self.player.playing:
-                self.report_now_playing()
+            if self.player.isPlaying():
+                self.player.stop()
 
         elif name == "seekTo":
             logger.debug("seekTo: {}".format(data))
