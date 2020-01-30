@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from resources.lib.kodi import kodilogging
-
 import xbmc
 
+from resources.lib.kodi import kodilogging
+
 monitor = xbmc.Monitor()
+logger = kodilogging.get_logger("player")
 
 STATUS_PLAYING = 1
 STATUS_PAUSED = 2
@@ -24,8 +25,13 @@ class CastPlayer(xbmc.Player):
 
     @property
     def status_code(self):  # type: () -> int
-        # TODO add more states
-        return STATUS_PAUSED if xbmc.getCondVisibility('Player.Paused') else STATUS_PLAYING
+        if xbmc.getCondVisibility("Player.Paused"):
+            return STATUS_PAUSED
+
+        if self.isPlaying():
+            return STATUS_PLAYING
+
+        return STATUS_STOPPED
 
     @property
     def playing(self):  # type: () -> bool
@@ -74,6 +80,7 @@ class CastPlayer(xbmc.Player):
         self.__report_state_change(status_code=STATUS_LOADING)
 
     def onPlayBackStopped(self):
+        logger.debug("stopped by user")
         # FIXME: This should probably behave differently than when the video ends naturally...
         if self.cast.has_client:
             self.onPlayBackEnded()
