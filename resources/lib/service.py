@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-from resources.lib.kodi import kodilogging
+import errno
+
+import xbmc
+
+from resources.lib.kodi import kodilogging, utils
 from resources.lib.kodi.utils import get_setting_as_bool
 from resources.lib.tubecast.chromecast import Chromecast
 from resources.lib.tubecast.kodicast import Kodicast, generate_uuid
 from resources.lib.tubecast.ssdp import SSDPserver
-
-import xbmc
-
 
 logger = kodilogging.get_logger()
 monitor = xbmc.Monitor()
@@ -17,7 +18,16 @@ def run():
     # Start SSDP service
     if get_setting_as_bool('enable-ssdp'):
         ssdp_server = SSDPserver()
-        ssdp_server.start(interfaces=Kodicast.interfaces)
+        try:
+            ssdp_server.start(interfaces=Kodicast.interfaces)
+        except IOError as e:
+            if e.errno == errno.ENODEV:
+                logger.warning("Failed to start SSDP server most likely due to network issues. "
+                               "Please make sure you're connected to the internet and then try again.")
+                utils.notification(message=utils.get_string(32014))
+            else:
+                logger.exception("failed to add membership")
+
     # Start HTTP server
     chromecast = Chromecast(monitor)
     chromecast.start()

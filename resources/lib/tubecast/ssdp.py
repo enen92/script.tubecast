@@ -8,13 +8,12 @@ import threading
 from resources.lib.kodi import kodilogging
 from resources.lib.kodi.utils import get_setting_as_bool
 from resources.lib.tubecast.kodicast import Kodicast
-from resources.lib.tubecast.utils import build_template, str_to_bytes, PY3
+from resources.lib.tubecast.utils import PY3, build_template, str_to_bytes
 
 if PY3:
     from socketserver import DatagramRequestHandler, ThreadingUDPServer
 else:
     from SocketServer import DatagramRequestHandler, ThreadingUDPServer
-
 
 logger = kodilogging.get_logger()
 
@@ -47,7 +46,6 @@ class ControlMixin(object):
 
 
 class MulticastServer(ControlMixin, ThreadingUDPServer):
-
     allow_reuse_address = True
 
     def __init__(self, addr, handler, poll_interval=0.5, bind_and_activate=True, interfaces=None):
@@ -103,11 +101,13 @@ class MulticastServer(ControlMixin, ThreadingUDPServer):
         self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
 
     def server_close(self):
-        self.handle_membership(socket.IP_DROP_MEMBERSHIP)
+        try:
+            self.handle_membership(socket.IP_DROP_MEMBERSHIP)
+        except IOError as e:
+            logger.warning("Couldn't drop multicast membership: %s", e)
 
 
 class SSDPHandler(DatagramRequestHandler):
-
     header = '''\
 HTTP/1.1 200 OK\r
 LOCATION: http://{{ ip }}:8008/ssdp/device-desc.xml\r
@@ -153,6 +153,9 @@ class SSDPserver(object):
     SSDP_ADDR = '239.255.255.250'
     SSDP_PORT = 1900
 
+    def __init__(self):
+        self.server = None
+
     def start(self, interfaces=None):
         logger.info('Starting SSDP server')
         self.server = MulticastServer((self.SSDP_ADDR, self.SSDP_PORT), SSDPHandler, interfaces=interfaces)
@@ -160,5 +163,9 @@ class SSDPserver(object):
 
     def shutdown(self):
         logger.info('Stopping SSDP server')
+        if not self.server:
+            logger.debug("SSDP server never started")
+            return
+
         self.server.server_close()
         self.server.stop()
