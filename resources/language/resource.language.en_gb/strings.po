@@ -72,3 +72,7 @@ msgstr ""
 msgctxt "#32013"
 msgid "Verify SSL connections"
 msgstr ""
+
+msgctxt "#32014"
+msgid "Failed to enable SSDP\nVerify your internet connection"
+msgstr ""
