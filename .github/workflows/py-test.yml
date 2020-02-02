@@ -21,4 +21,5 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest
+        pip install Kodistubs
         pytest -v
