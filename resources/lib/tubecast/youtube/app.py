@@ -511,7 +511,7 @@ class YoutubeListener(threading.Thread):
             if debug_http:
                 logger.debug("received chunk %r", chunk)
 
-            parser.write(chunk)
+            parser.write(chunk.decode("utf-8") if PY3 else chunk)
             for cmd in parser.get_commands():
                 self.app.handle_cmd(cmd)
 
