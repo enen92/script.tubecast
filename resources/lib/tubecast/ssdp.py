@@ -129,6 +129,14 @@ ST: urn:dial-multiscreen-org:service:dial:1\r
         socket = self.request[1]
         socket.sendto(str_to_bytes(data), address)
 
+    @staticmethod
+    def get_remote_ip(address):
+        # Create a socket to determine what address the client should use
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(address)
+        iface = s.getsockname()[0]
+        return iface if PY3 else unicode(iface)
+
     def datagram_received(self, datagram, address):
         if get_setting_as_bool('debug-ssdp'):
             logger.debug('Datagram received. Address:{}; Content:{}'.format(address, datagram))
@@ -136,9 +144,9 @@ ST: urn:dial-multiscreen-org:service:dial:1\r
             if get_setting_as_bool('debug-ssdp'):
                 logger.debug("Answering datagram")
 
-            ip, port = self.server.chromecast_addr
+            _, port = self.server.chromecast_addr
             data = build_template(self.header).render(
-                ip=ip,
+                ip=self.get_remote_ip(address),
                 port=port,
                 uuid=Kodicast.uuid
             )
