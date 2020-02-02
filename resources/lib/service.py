@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
-from resources.lib.kodi import kodilogging
+import xbmc
+
 from resources.lib.kodi.utils import get_setting_as_bool
 from resources.lib.tubecast.chromecast import Chromecast
 from resources.lib.tubecast.kodicast import Kodicast, generate_uuid
 from resources.lib.tubecast.ssdp import SSDPserver
 
-import xbmc
-
-
-logger = kodilogging.get_logger()
 monitor = xbmc.Monitor()
 
 
