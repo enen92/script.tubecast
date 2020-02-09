@@ -359,7 +359,7 @@ class YoutubeCastV1(object):
 
     def _resume(self):
         is_playing = self.player.isPlaying()
-        if is_playing and self.player.playing:
+        if is_playing and not self.player.playing:
             # Toggle playback to resume
             self.player.pause()
         elif not is_playing and self.state.has_playlist:

@@ -2,6 +2,7 @@
 .gitattributes export-ignore
 .github export-ignore
 tests export-ignore
+test-requirements.txt export-ignore
 .pytest_cache export-ignore
 __pycache__ export-ignore
 .log export-ignore

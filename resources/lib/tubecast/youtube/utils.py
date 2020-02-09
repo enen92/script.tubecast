@@ -4,6 +4,10 @@ import logging
 import re
 from collections import namedtuple
 
+from resources.lib.kodi import kodilogging
+from resources.lib.kodi.utils import get_setting_as_bool
+
+logger = kodilogging.get_logger()
 
 Command = namedtuple("Command", ("code", "name", "data"))
 
@@ -13,14 +17,7 @@ def _command_from_match(match):
     name = match.group("cmd")
     raw_data = match.group("data")
     if raw_data:
-        data = ast.literal_eval(
-            "{}".format(
-                raw_data
-                .replace('"{', '{')
-                .replace('}"', '}')
-                .replace('\\"', '"')
-                )
-            )
+        data = ast.literal_eval(raw_data)
     else:
         data = None
 
@@ -49,15 +46,21 @@ class CommandParser:
         if not self.pending:
             return
 
+        debug_cmds = logger.isEnabledFor(logging.DEBUG) and get_setting_as_bool("debug-cmd")
+
         end_index = 0
         try:
             for match in CMD_PATTERN.finditer(self.pending):
+                if debug_cmds:
+                    skipped = self.pending[end_index:match.start()]
+                    if skipped:
+                        logger.debug("command parser skipped: %r", skipped)
+
                 end_index = match.end()
                 try:
                     cmd = _command_from_match(match)
                 except SyntaxError:
-                    # better to raise so we can find commands not yet working
-                    raise Exception("unable to parse command")
+                    logger.exception("unable to parse command")
                 else:
                     yield cmd
         finally:
