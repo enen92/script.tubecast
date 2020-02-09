@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 from resources.lib.tubecast.youtube.utils import Command, CommandParser
 
+# Old test cases removed with the new command parser.
+# See https://github.com/enen92/script.tubecast/pull/36#discussion_r374240719
+#
+# cmd_1 = '[[20,["remoteDisconnected",{"app":"android-phone-13.05.52","pairingType":"dial","capabilities":"atp,que,mus","ui":"true","clientName":"android","experiments":"","name":"MYPHONE","remoteControllerUrl":"ws://","id":"something","type":"REMOTE_CONTROL","device":"{\"app\":\"android-phone-13.05.52\",\"pairingType\":\"dial\",\"capabilities\":\"atp,que,mus\",\"clientName\":\"android\",\"experiments\":\"\",\"name\":\"MYPHONE\",\"remoteControllerUrl\":\"ws://\",\"id\":\"id\",\"type\":\"REMOTE_CONTROL\"}"}]]'
+# cmd_2 = '20,["remoteDisconnected",{"app":"android-phone-13.05.52","pairingType":"dial","capabilities":"atp,que,mus","ui":"true","clientName":"android","experiments":"","name":"MYPHONE","remoteControllerUrl":"ws://","id":"something","type":"REMOTE_CONTROL","device":"{\"app\":\"android-phone-13.05.52\",\"pairingType\":\"dial\",\"capabilities\":\"atp,que,mus\",\"clientName\":\"android\",\"experiments\":\"\",\"name\":\"MYPHONE\",\"remoteControllerUrl\":\"ws://\",\"id\":\"id\",\"type\":\"REMOTE_CONTROL\"}"}]]'
+#
+# TL;DR: both commands invalid because of quoting issues and cmd_2 is missing the starting bracket '['.
+
 # Chunk containing: "c", "S", "loungeStatus", "getNowPlaying"
 cmd_bind_info = '461\n[[0,["c","cid","",8]\n]\n,[1,["S","sid"]]\n,[2,["loungeStatus",{"devices":"[{\\"app\\":\\"kodi-tubecast\\",\\"capabilities\\":\\"que,mus\\",\\"clientName\\":\\"unknown\\",\\"experiments\\":\\"\\",\\"name\\":\\"Kodi (kodi)\\",\\"id\\":\\"id\\",\\"type\\":\\"LOUNGE_SCREEN\\",\\"hasCc\\":\\"true\\"}]","connectionEventDetails":"{\\"deviceId\\":\\"id\\"}"}]]\n,[3,["getNowPlaying"]]\n]\n'
 cmd_remote_connected = '550\n[[6,["remoteConnected",{"app":"android-phone","pairingType":"dial","capabilities":"que,atp,mus","ui":"true","clientName":"android","experiments":"","name":"name","remoteControllerUrl":"","id":"id","type":"REMOTE_CONTROL","device":"{\\"app\\":\\"android-phone\\",\\"pairingType\\":\\"dial\\",\\"capabilities\\":\\"que,atp,mus\\",\\"clientName\\":\\"android\\",\\"experiments\\":\\"\\",\\"name\\":\\"name\\",\\"remoteControllerUrl\\":\\"\\",\\"id\\":\\"id\\",\\"type\\":\\"REMOTE_CONTROL\\"}"}]]\n]\n'
