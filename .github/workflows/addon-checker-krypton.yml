@@ -1,0 +1,16 @@
+name: Kodi Addon-Check (Krypton)
+
+on: [push, pull_request]
+
+jobs:
+  kodi-addon-checker-krypton:
+    runs-on: ubuntu-latest
+    name: Kodi addon checker
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Kodi addon checker validation (krypton)
+      id: kodi-addon-checker-krypton
+      uses: xbmc/action-kodi-addon-checker@v1.0
+      with:
+        kodi-version: krypton
