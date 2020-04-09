@@ -6,3 +6,4 @@ test-requirements.txt export-ignore
 .pytest_cache export-ignore
 __pycache__ export-ignore
 .log export-ignore
+.tools export-ignore
