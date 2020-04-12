@@ -1,6 +1,14 @@
 name: Kodi Addon-Check (Matrix)
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - v*
+  pull_request:
+    branches:
+      - '*'
 
 jobs:
   kodi-addon-checker-matrix:
@@ -9,11 +17,12 @@ jobs:
           steps:
           - name: Checkout
             uses: actions/checkout@v1
-          - name: Modify addon.xml for matrix
-            run: |
-              python3 tools/modify_addonxml_matrix.py
+
           - name: Kodi addon checker validation (matrix)
-            id: kodi-addon-checker-matrix
-            uses: xbmc/action-kodi-addon-checker@v1.0
+            id: kodi-addon-checker-krypton
+            uses: xbmc/action-kodi-addon-checker@v1.2
             with:
               kodi-version: matrix
+              is-pr: false
+              addon-id: ${{ github.event.repository.name }}
+              rewrite-for-matrix: true
