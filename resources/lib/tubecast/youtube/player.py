@@ -20,6 +20,8 @@ class CastPlayer(xbmc.Player):
         self.from_yt = False
 
     def play_from_youtube(self, url):  # type: (str) -> None
+        if self.isPlaying():
+            self.stop()
         self.from_yt = True
         self.play(url)
 
