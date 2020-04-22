@@ -32,7 +32,7 @@ jobs:
       uses: xbmc/action-kodi-addon-checker@v1.2
       with:
         kodi-version: krypton
-        is-pr: true
+        is-pr: false
         addon-id: ${{ github.event.repository.name }}
         rewrite-for-matrix: false
 
@@ -41,7 +41,7 @@ jobs:
       uses: xbmc/action-kodi-addon-checker@v1.2
       with:
         kodi-version: matrix
-        is-pr: true
+        is-pr: false
         addon-id: ${{ github.event.repository.name }}
         rewrite-for-matrix: true
 
