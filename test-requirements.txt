@@ -1,5 +1,0 @@
-bottle
-mock
-pytest
-pytest-mock
-requests
