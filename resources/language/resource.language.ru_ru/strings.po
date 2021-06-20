@@ -26,7 +26,7 @@ msgstr "Получение кода..."
 
 msgctxt "#32002"
 msgid "Please insert the following code in YouTube app settings"
-msgstr "Пожалуйста введите указаный ниже код в приложении Youtube"
+msgstr "Пожалуйста введите указанный ниже код в приложении Youtube"
 
 msgctxt "#32003"
 msgid "General"
@@ -78,4 +78,4 @@ msgstr "Отладка HTTP запросов"
 
 msgctxt "#32015"
 msgid "Kodi advertisement name (fallback)"
-msgstr "Имя устройства (альтенатива)"
+msgstr "Имя устройства (альтернатива)"
