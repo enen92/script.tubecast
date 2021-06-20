@@ -16,7 +16,7 @@
         <description lang="en_GB">An implementation of the Cast V1 protocol in Kodi to act as a player for the Youtube mobile application</description>
         <description lang="pt_PT">Uma implementação do protocolo Cast V1 no Kodi para este funcionar como player externo remotamente controlado pela aplicação móvel do YouTube</description>
         <description lang="es_ES">Una implementación del protocolo Cast V1 en Kodi para actuar como reproductor externo para la aplicación móvil de Youtube</description>
-	<description lang="ru_RU">Реализация протокола Cast V1 в Kodi для работы в качестве проигрывателя для мобильного приложения Youtube</description>
+	<description lang="ru_RU">Реализация протокола Cast V1 для работы в качестве проигрывателя в мобильном приложении Youtube</description>
         <platform>all</platform>
         <license>MIT</license>
         <forum>https://forum.kodi.tv/showthread.php?tid=329153</forum>
