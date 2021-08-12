@@ -36,7 +36,7 @@ None, for now at least :)
 
 ### Translations
 
-You can help translating this addon at [Kodi's weblate](https://www.[google](https://kodi.weblate.cloud/projects/kodi-add-ons-scripts/script-tubecast/).com).
+You can help translating this addon at [Kodi's weblate](https://kodi.weblate.cloud/projects/kodi-add-ons-scripts/script-tubecast/)
 
 ### Notes
 
