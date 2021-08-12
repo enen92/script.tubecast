@@ -3,7 +3,7 @@
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.bottle" version="0.12.0"/>
-        <import addon="script.module.requests" version="2.12.4"/>
+        <import addon="script.module.requests" version="2.25.1+matrix.1"/>
         <import addon="plugin.video.tubed" version="1.0.1+matrix.1"/>
     </requires>
     <extension point="xbmc.python.script" library="script.py" />
