@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="script.tubecast" name="TubeCast" version="1.4.7+matrix.1" provider-name="enen92">
+<addon id="script.tubecast" name="TubeCast" version="1.4.8+matrix.1" provider-name="enen92">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.bottle" version="0.12.0"/>
@@ -16,11 +16,7 @@
         <email>enen92@kodi.tv</email>
         <source>https://github.com/enen92/script.tubecast</source>
         <news>
-            [fix] Fix cast with new youtube app (tks @ivanich @Chalanxe @patrickkfkan)
-            [fix] Bump requirements
-            [new] Added translation support via weblate
-            [new] russian translation (tks @DimmKG)
-            [new] Add setting to allow the use of youtube instead of tubed
+            [new] sync translations
         </news>
         <assets>
             <icon>resources/img/icon.png</icon>
