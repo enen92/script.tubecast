@@ -17,6 +17,7 @@
         <source>https://github.com/enen92/script.tubecast</source>
         <news>
             [new] sync translations
+            [new] fix issue related to different href and rel (dial spec)
         </news>
         <assets>
             <icon>resources/img/icon.png</icon>
