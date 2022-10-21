@@ -334,7 +334,7 @@ class YoutubeCastV1(object):
 
         elif name == "seekTo":
             logger.debug("seekTo: {}".format(data))
-            self._seek(int(data["newTime"]))
+            self._seek(round(float(data["newTime"])))
 
         elif name == "getVolume":
             logger.debug("getVolume received")
