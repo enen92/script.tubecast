@@ -104,3 +104,11 @@ msgstr "Tubed"
 msgctxt "#32018"
 msgid "Youtube"
 msgstr "유튜브"
+
+msgctxt "#32019"
+msgid "Cast requested port"
+msgstr ""
+
+msgctxt "#32020"
+msgid "Cast active port"
+msgstr ""

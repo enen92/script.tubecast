@@ -107,3 +107,11 @@ msgstr "Youtube"
 #~ msgctxt "#32016"
 #~ msgid "Playback addon"
 #~ msgstr "Addon para playback"
+
+msgctxt "#32019"
+msgid "Cast requested port"
+msgstr ""
+
+msgctxt "#32020"
+msgid "Cast active port"
+msgstr ""
