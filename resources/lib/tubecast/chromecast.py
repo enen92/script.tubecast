@@ -8,7 +8,7 @@ except ImportError:
 
 from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
-from resources.lib.kodi import kodilogging
+from resources.lib.kodi import kodilogging, utils
 from resources.lib.tubecast.dial import app
 
 import socket
@@ -44,9 +44,12 @@ class Chromecast(object):
 
     def __init__(self, monitor):
         self._monitor = monitor
+
+        cast_requested_port = utils.get_setting_as_int("cast-requested-port")
         self._server_thread = threading.Thread(name="ChromecastServer",
                                                target=self._run_server,
-                                               args=('0.0.0.0', 0))
+                                               args=('0.0.0.0', cast_requested_port))
+        logger.info("Cast requested port: {}".format(cast_requested_port))
         self._server_thread.daemon = True
         self._server = None
         self._has_server = threading.Event()
@@ -56,6 +59,8 @@ class Chromecast(object):
         self._server = make_server(host, port, app,
                                    server_class=ThreadedWSGIServer,
                                    handler_class=SilentWSGIRequestHandler)
+        utils.set_setting("cast-active-port", self._server.server_port)
+        logger.info("Cast active port: {}".format(self._server.server_port))
         self._has_server.set()
         self._server.timeout = 0.1
         while not self._abort_var or not self._monitor.abortRequested():

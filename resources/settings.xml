@@ -5,6 +5,8 @@
 		<setting label="32013" type="bool" id="verify-ssl" default="true"/>
 		<setting label="32015" type="text" id="kodi-advertise" default="Kodi-TV"/>
 		<setting label="32016" type="labelenum" id="playback-addon" lvalues="32017|32018"/>
+		<setting label="32019" type="number" id="cast-requested-port" default="0"/>
+		<setting label="32020" type="number" id="cast-active-port" default="" enable="false"/>
 	</category>
 	<category label="32012">
 		<setting label="32005" type="bool" id="debug-ssdp" default="false"/>
