@@ -4,6 +4,7 @@ import operator
 import socket
 import struct
 import threading
+import time
 
 from resources.lib.kodi import kodilogging
 from resources.lib.kodi.utils import get_setting_as_bool
@@ -153,15 +154,79 @@ ST: urn:dial-multiscreen-org:service:dial:1\r
 class SSDPserver(object):
     SSDP_ADDR = '239.255.255.250'
     SSDP_PORT = 1900
+    
+    def __init__(self):
+        self.server = None
+        self.is_running = False
+        self.retry_thread = None
+        self.stop_retry = threading.Event()
 
     def start(self, chromecast_addr, interfaces=None):
         logger.info('Starting SSDP server')
-        self.server = MulticastServer((self.SSDP_ADDR, self.SSDP_PORT), SSDPHandler,
-                                      chromecast_addr=chromecast_addr,
-                                      interfaces=interfaces)
-        self.server.start()
+        try:
+            self.server = MulticastServer((self.SSDP_ADDR, self.SSDP_PORT), SSDPHandler,
+                                          chromecast_addr=chromecast_addr,
+                                          interfaces=interfaces)
+            self.server.start()
+            self.is_running = True
+            # If we successfully started, make sure to clear any retry thread
+            if self.retry_thread and self.retry_thread.is_alive():
+                self.stop_retry.set()
+                self.retry_thread.join()
+                self.retry_thread = None
+        except (socket.error, OSError) as e:
+            logger.warning('Failed to start SSDP server: {}. Will retry in background.'.format(str(e)))
+            # Start a background thread to retry SSDP initialization
+            if not self.retry_thread or not self.retry_thread.is_alive():
+                self.stop_retry.clear()
+                self.retry_thread = threading.Thread(
+                    name="SSDPRetry",
+                    target=self._retry_start,
+                    args=(chromecast_addr, interfaces)
+                )
+                self.retry_thread.daemon = True
+                self.retry_thread.start()
+
+    def _retry_start(self, chromecast_addr, interfaces):
+        """Retry starting the SSDP server in the background"""
+        retry_count = 0
+        max_retries = 10  # Limit retries to prevent infinite attempts
+        retry_delay = 30  # Initial delay in seconds
+        
+        while not self.stop_retry.is_set() and retry_count < max_retries and not self.is_running:
+            logger.debug('Retrying SSDP server start (attempt {}/{})...'.format(retry_count+1, max_retries))
+            # Wait for the specified delay before retrying
+            if self.stop_retry.wait(retry_delay):
+                break  # Exit if stop_retry was set
+                
+            try:
+                self.server = MulticastServer((self.SSDP_ADDR, self.SSDP_PORT), SSDPHandler,
+                                            chromecast_addr=chromecast_addr,
+                                            interfaces=interfaces)
+                self.server.start()
+                self.is_running = True
+                logger.info('SSDP server successfully started after retry')
+                break
+            except (socket.error, OSError) as e:
+                logger.warning('Retry attempt {} failed: {}'.format(retry_count+1, str(e)))
+                retry_count += 1
+                # Increase delay with each retry, but max out at 5 minutes
+                retry_delay = min(retry_delay * 1.5, 300)
 
     def shutdown(self):
         logger.info('Stopping SSDP server')
-        self.server.server_close()
-        self.server.stop()
+        # Stop retry thread if it's running
+        if self.retry_thread and self.retry_thread.is_alive():
+            self.stop_retry.set()
+            self.retry_thread.join(1.0)  # Wait max 1 second for thread to end
+            
+        # Shutdown the server if it was started
+        if self.server and self.is_running:
+            try:
+                self.server.server_close()
+                self.server.stop()
+            except Exception as e:
+                logger.error('Error shutting down SSDP server: {}'.format(str(e)))
+            finally:
+                self.is_running = False
+                self.server = None
